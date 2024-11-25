@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YOLOv8 Detection</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        header {
+            background-color: #007bff;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            width: 100%;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+        main {
+            margin: 20px;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 800px;
+            text-align: center;
+        }
+        .upload-frame {
+            position: relative;
+            border: 2px dashed #007bff;
+            border-radius: 10px;
+            width: 100%;
+            max-width: 400px;
+            height: 400px;
+            margin: 20px auto;
+            display: flex;
+            flex-direction: column; /* Stack content vertically */
+            align-items: center;
+            justify-content: center;
+            color: #007bff;
+            background-color: #f9f9ff;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            overflow: hidden;
+        }
+        .upload-frame:hover {
+            background-color: #eef4ff;
+        }
+        .upload-frame img.upload-icon {
+            width: 100px; /* Icon size */
+            height: auto;
+            margin-bottom: 10px; /* Space between icon and label */
+        }
+        .upload-frame span.upload-text {
+            font-size: 16px;
+            font-weight: bold;
+            color: #007bff;
+        }
+        .button-container {
+            margin-top: 10px;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+        .action-btn {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+        .action-btn:hover {
+            background-color: #0056b3;
+        }
+        footer {
+            margin-top: 20px;
+            font-size: 14px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Car Color Detection</h1>
+    </header>
+    <main>
+        <!-- Upload Frame -->
+        <div class="upload-frame" id="upload-frame">
+            <input type="file" id="file" name="file" accept="image/*" required style="display: none;">
+            <img class="upload-icon" src="{{ url_for('static', filename='upload_4.png') }}" alt="Upload Icon">
+            <span class="upload-text" id="upload-text">Click to Upload</span>
+        </div>
+
+        <!-- Buttons for Detection and Reset -->
+        <div class="button-container">
+            <button class="action-btn" id="process-btn" disabled>Run Detection</button>
+            <button class="action-btn" id="upload-new-btn">Upload New Photo</button>
+        </div>
+    </main>
+    <footer>
+        YOLOv8 Detection App - Powered by Flask and YOLOv8
+    </footer>
+
+    <script>
+        const fileInput = document.getElementById('file');
+        const uploadFrame = document.getElementById('upload-frame');
+        const processButton = document.getElementById('process-btn');
+        const uploadNewButton = document.getElementById('upload-new-btn');
+
+        let uploadedImage = null;
+
+        // When a file is selected, replace the upload icon and label with the uploaded image
+        fileInput.addEventListener('change', function (event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    uploadedImage = e.target.result;
+
+                    // Replace the content in the upload frame
+                    uploadFrame.innerHTML = `<img src="${e.target.result}" alt="Uploaded Image" style="max-width: 100%; max-height: 100%; object-fit: contain;">`;
+                    processButton.disabled = false; // Enable the "Process Detection" button
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Open file dialog when clicking "Upload New Photo"
+        uploadNewButton.addEventListener('click', function () {
+            fileInput.click();
+        });
+
+        // Open file dialog when clicking the upload frame
+        uploadFrame.addEventListener('click', function () {
+            fileInput.click();
+        });
+
+        // Process detection when clicking "Run Detection"
+        processButton.addEventListener('click', function () {
+            if (uploadedImage) {
+                const formData = new FormData();
+                formData.append('file', fileInput.files[0]);
+
+                fetch('/detect', {
+                    method: 'POST',
+                    body: formData,
+                })
+                .then((response) => response.blob())
+                .then((blob) => {
+                    const detectedImageUrl = URL.createObjectURL(blob);
+                    uploadFrame.innerHTML = `<img src="${detectedImageUrl}" alt="Detected Image" style="max-width: 100%; max-height: 100%; object-fit: contain;">`;
+                })
+                .catch((error) => console.error('Error processing detection:', error));
+            }
+        });
+    </script>
+</body>
+</html>

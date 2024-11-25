@@ -1,0 +1,13 @@
+train: /Users/andrescabral/Desktop/Cars color recognition/train/images
+val: /Users/andrescabral/Desktop/Cars color recognition/valid/images
+test: /Users/andrescabral/Desktop/Cars color recognition/test/images
+
+nc: 6
+names: ['black', 'blue', 'green', 'red', 'white', 'yellow']
+
+roboflow:
+  workspace: final-project-jwpes
+  project: cars-color-recognition
+  version: 1
+  license: CC BY 4.0
+  url: https://universe.roboflow.com/final-project-jwpes/cars-color-recognition/dataset/1
